@@ -1,5 +1,5 @@
 import math
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
@@ -16,7 +16,7 @@ def safe_eval(func_str, x):
     except Exception:
         return None
 
-# --- 2. SOLVER ALGORITHMS (Returning Data Lists) ---
+# --- 2. SOLVER ALGORITHMS ---
 
 def solve_bisection(func_str, a, b, tol, max_iter):
     data = []
@@ -161,7 +161,7 @@ def solve_fixed_point(g_str, x0, tol, max_iter):
         data.append({
             "iter": i, 
             "root": round(x1, 8), 
-            "func": round(x1, 8), # g(x) is the new x
+            "func": round(x1, 8), 
             "error": round(error, 8)
         })
 
@@ -207,17 +207,17 @@ def solve_mod_secant(func_str, x0, delta, tol, max_iter):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    result = None
-    
+    # HANDLE POST (The Calculation Request)
     if request.method == 'POST':
         try:
-            # Get common inputs
+            # request.form works for FormData sent via JS fetch
             method = request.form.get('method')
             func_str = request.form.get('function')
             tol = float(request.form.get('tolerance'))
             max_iter = int(request.form.get('max_iter'))
             
-            # Dispatch based on method
+            result = None
+            
             if method == 'bisection':
                 a = float(request.form.get('param_a'))
                 b = float(request.form.get('param_b'))
@@ -246,14 +246,17 @@ def index():
                 x0 = float(request.form.get('param_x0'))
                 delta = float(request.form.get('param_delta'))
                 result = solve_mod_secant(func_str, x0, delta, tol, max_iter)
+            
+            # --- CRITICAL FIX: RETURN JSON ---
+            return jsonify(result)
                 
         except ValueError:
-            result = {"error": "Input Error: Ensure all fields are numbers where required."}
+            return jsonify({"error": "Input Error: Ensure all fields are numbers where required."})
         except Exception as e:
-            result = {"error": f"System Error: {str(e)}"}
+            return jsonify({"error": f"System Error: {str(e)}"})
 
-    return render_template('index.html', result=result)
+    # HANDLE GET (Loading the page)
+    return render_template('index.html')
 
 if __name__ == '__main__':
-    # debug=True is fine for local dev, but we'll handle deployment later
     app.run(debug=True)
