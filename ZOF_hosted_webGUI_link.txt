@@ -1,4 +1,4 @@
 Name: Jeffery OSaze Osatohanmwen
 Matric Number: 22CG031943
-Live URL: [Leave empty until you deploy]
-GitHub Repository: [Leave empty until you upload]
+Live URL: https://zof-solver-22cg031943-osato.onrender.com
+GitHub Repository: https://github.com/Code-Ben404/ZOF_Project.git
